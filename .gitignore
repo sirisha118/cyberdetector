@@ -10,3 +10,6 @@ instance/
 app/ml/model.joblib
 verify_*.py
 *.log
+check_out.txt
+pip_err.txt
+git_setup.py
