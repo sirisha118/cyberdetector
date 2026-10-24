@@ -1,0 +1,29 @@
+# Render.com infrastructure-as-code config
+# Render will read this when you connect your GitHub repo.
+services:
+  - type: web
+    name: cybershield
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn wsgi:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: FLASK_CONFIG
+        value: production
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ALLOW_REGISTRATION
+        value: "true"
+      - key: ENABLE_SCHEDULER
+        value: "false"
+      - key: DATABASE_URL
+        fromDatabase:
+          name: cybershield-db
+          property: connectionString
+      - key: SESSION_COOKIE_SECURE
+        value: "true"
+
+databases:
+  - name: cybershield-db
+    databaseName: cybershield
+    plan: free

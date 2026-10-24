@@ -1,0 +1,83 @@
+{% extends 'base.html' %}{% block title %}Message Scan #{{ scan.id }}{% endblock %}{% block content %}
+{% from '_macros.html' import level, action, score, csrf %}
+<a href="{{ url_for('main.sms_list') }}" class="small">&larr; Message scans</a>
+<div class="d-flex flex-wrap justify-content-between align-items-start my-2 gap-2">
+ <div>
+  <h4 class="mb-1">{{ scan.source | upper }} from {{ scan.sender or '(unknown)' }}</h4>
+  <div class="text-muted small">Scanned {{ scan.scanned_at.strftime('%Y-%m-%d %H:%M') }} UTC
+   {% if scan.received_at %} · Received {{ scan.received_at.strftime('%Y-%m-%d %H:%M') }} UTC{% endif %}
+  </div>
+ </div>
+ <div class="d-flex gap-2 align-items-center">{{ level(scan.threat_level) }} {{ action(scan.action) }}</div>
+</div>
+
+<div class="row g-3 mt-1">
+ <div class="col-lg-8">
+  {# Why this verdict #}
+  <div class="card mb-3">
+   <div class="card-header">Why this verdict? <span class="float-end text-muted small">verdict: {{ scan.verdict }}</span></div>
+   <ul class="list-group list-group-flush">
+    {% for r in scan.reasons %}
+    <li class="list-group-item bg-transparent text-light d-flex justify-content-between">
+     <span>{{ r.detail }}</span>
+     <span class="badge {{ 'bg-danger' if r.points >= 20 else 'bg-warning text-dark' if r.points > 0 else 'bg-secondary' }}">+{{ r.points }}</span>
+    </li>
+    {% else %}<li class="list-group-item bg-transparent text-muted">No risk indicators found.</li>{% endfor %}
+   </ul>
+  </div>
+
+  {# Message text #}
+  <div class="card mb-3">
+   <div class="card-header">Message text</div>
+   <div class="card-body"><div class="body-excerpt">{{ scan.message_excerpt }}</div></div>
+  </div>
+
+  {# URLs found #}
+  {% if scan.urls %}
+  <div class="card mb-3">
+   <div class="card-header">Links found ({{ scan.urls | length }})</div>
+   <div class="table-responsive">
+    <table class="table mb-0 align-middle"><tbody>
+     {% for u in scan.urls %}
+     <tr>
+      <td class="mono">{{ u.url[:140] }}{% if u.final_url and u.final_url != u.url %}<br><small class="text-muted">→ {{ u.final_url[:120] }}</small>{% endif %}</td>
+      <td style="width:70px">{{ u.score }}</td>
+      <td>{% if u.flagged %}<span class="badge bg-danger">flagged</span>{% endif %}
+       <small class="text-muted">{{ u.reasons | join('; ') }}</small></td>
+     </tr>
+     {% endfor %}
+    </tbody></table>
+   </div>
+  </div>
+  {% endif %}
+ </div>
+
+ <div class="col-lg-4">
+  {# Risk score card #}
+  <div class="card mb-3">
+   <div class="card-body">
+    <div class="stat-label">Risk score</div>
+    <div class="stat mb-2">{{ scan.risk_score }}<small class="fs-6 text-muted">/100</small></div>
+    {{ score(scan.risk_score) }}
+    <div class="mt-3 small text-muted">
+     <div class="d-flex justify-content-between"><span>0–19</span><span>Low Risk (safe)</span></div>
+     <div class="d-flex justify-content-between"><span>20–39</span><span>Caution</span></div>
+     <div class="d-flex justify-content-between"><span>40–69</span><span>Medium Risk</span></div>
+     <div class="d-flex justify-content-between"><span>70–89</span><span>High Risk</span></div>
+     <div class="d-flex justify-content-between"><span>90–100</span><span>Critical Risk</span></div>
+    </div>
+   </div>
+  </div>
+
+  {# Actions #}
+  <div class="card">
+   <div class="card-header">Actions</div>
+   <div class="card-body d-grid gap-2">
+    <form method="post" action="{{ url_for('main.sms_delete', scan_id=scan.id) }}">{{ csrf() }}
+     <button class="btn btn-outline-danger w-100">Delete scan record</button>
+    </form>
+   </div>
+  </div>
+ </div>
+</div>
+{% endblock %}

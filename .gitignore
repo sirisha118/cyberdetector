@@ -1,0 +1,12 @@
+__pycache__/
+*.pyc
+.env
+venv/
+.venv/
+logs/
+*.sqlite3
+instance/
+.pytest_cache/
+app/ml/model.joblib
+verify_*.py
+*.log

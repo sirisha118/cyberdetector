@@ -1,0 +1,16 @@
+{% extends 'base.html' %}{% block title %}Senders{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Sender block &amp; allow lists</h4>
+<div class="card mb-4"><div class="card-body"><form class="row g-2" method="post">{{ csrf() }}
+ <div class="col-md-4"><input name="pattern" class="form-control" placeholder="user@example.com or example.com" required></div>
+ <div class="col-md-2"><select name="list_type" class="form-select"><option value="block">Block</option><option value="allow">Allow</option></select></div>
+ <div class="col-md-4"><input name="reason" class="form-control" placeholder="Reason (optional)"></div>
+ <div class="col-md-2"><button class="btn btn-accent w-100">Add</button></div></form>
+ <div class="form-text mt-2">A domain entry also covers its subdomains. Allow-listed senders skip scoring, except confirmed malware attachments.</div></div></div>
+<div class="row g-3">
+{% for title, rows in [('Blocked senders', blocked), ('Allowed senders', allowed)] %}
+<div class="col-lg-6"><div class="card"><div class="card-header">{{ title }} ({{ rows|length }})</div><div class="table-responsive"><table class="table align-middle mb-0">
+<tbody>{% for r in rows %}<tr><td><b>{{ r.pattern }}</b><div class="small text-muted">{{ r.reason or '' }}{% if r.auto_added %} · <span class="badge bg-info text-dark">auto</span>{% endif %}{% if r.list_type == 'block' %} · {{ r.hits }} hits{% endif %}</div></td>
+<td class="text-end"><form method="post" action="{{ url_for('main.delete_sender', rule_id=r.id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline-secondary">Remove</button></form></td></tr>
+{% else %}<tr><td class="text-muted text-center py-3">Empty</td></tr>{% endfor %}</tbody></table></div></div></div>
+{% endfor %}</div>{% endblock %}

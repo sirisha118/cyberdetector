@@ -1,0 +1,48 @@
+{% extends 'base.html' %}{% block title %}Message Scans{% endblock %}{% block content %}
+{% from '_macros.html' import level, action, score, pager %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+ <h4>Message scans <small class="text-muted fs-6">SMS &amp; messaging</small></h4>
+ <a href="{{ url_for('main.sms_scan') }}" class="btn btn-accent btn-sm">+ Scan message</a>
+</div>
+
+{# Filters #}
+<form class="row g-2 mb-3" method="get">
+ <div class="col-auto">
+  <select name="source" class="form-select form-select-sm">
+   <option value="">All sources</option>
+   {% for src in ['sms','whatsapp','telegram','messenger','manual'] %}
+   <option value="{{ src }}" {{ 'selected' if request.args.get('source') == src }}>{{ src|capitalize }}</option>
+   {% endfor %}
+  </select>
+ </div>
+ <div class="col-auto">
+  <select name="action" class="form-select form-select-sm">
+   <option value="">All actions</option>
+   {% for act in ['allowed','quarantined','blocked'] %}
+   <option value="{{ act }}" {{ 'selected' if request.args.get('action') == act }}>{{ act|capitalize }}</option>
+   {% endfor %}
+  </select>
+ </div>
+ <div class="col-auto"><button class="btn btn-sm btn-outline-secondary">Filter</button></div>
+</form>
+
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+<thead><tr><th>Source</th><th>Sender</th><th>Message</th><th>Scanned</th><th>Risk</th><th>Level</th><th>Action</th></tr></thead><tbody>
+{% for s in page.items %}
+<tr onclick="location='{{ url_for('main.sms_detail', scan_id=s.id) }}'" style="cursor:pointer">
+ <td><span class="badge bg-secondary">{{ s.source }}</span></td>
+ <td class="text-truncate" style="max-width:130px">{{ s.sender or '(unknown)' }}</td>
+ <td class="text-truncate" style="max-width:280px">{{ s.message_excerpt or '' }}</td>
+ <td class="small text-muted text-nowrap">{{ s.scanned_at.strftime('%m-%d %H:%M') }}</td>
+ <td style="min-width:110px">{{ score(s.risk_score) }}</td>
+ <td>{{ level(s.threat_level) }}</td>
+ <td>{{ action(s.action) }}</td>
+</tr>
+{% else %}
+<tr><td colspan="7" class="text-center text-muted py-4">
+ No message scans yet. <a href="{{ url_for('main.sms_scan') }}">Scan a message now →</a>
+</td></tr>
+{% endfor %}
+</tbody></table></div></div>
+{{ pager(page, 'main.sms_list') }}
+{% endblock %}

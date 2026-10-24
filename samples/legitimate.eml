@@ -1,0 +1,17 @@
+From: Priya Sharma <priya@company-example.org>
+To: you@example.org
+Subject: Notes from Tuesday's roadmap meeting
+Message-ID: <ham1@cybershield.sample>
+Authentication-Results: mx.example.org; spf=pass; dkim=pass; dmarc=pass
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+Hi,
+
+Attaching the notes from our roadmap meeting. Can we sync on Thursday at 3pm =
+to go over next steps? The shared doc is at https://docs.company-example.org/=
+roadmap
+
+Thanks,
+Priya

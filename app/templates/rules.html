@@ -1,0 +1,31 @@
+{% extends 'base.html' %}{% block title %}Security rules{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Security policy</h4>
+<div class="row g-3">
+<div class="col-lg-6"><div class="card"><div class="card-header">Detection &amp; response</div><div class="card-body">
+<form method="post">{{ csrf() }}
+ <div class="row g-3 mb-3">
+  <div class="col-6"><label class="form-label">Quarantine at score ≥</label><input type="number" min="1" max="99" name="quarantine_threshold" class="form-control" value="{{ st.quarantine_threshold }}"></div>
+  <div class="col-6"><label class="form-label">Block (and auto-block sender) at ≥</label><input type="number" min="2" max="100" name="block_threshold" class="form-control" value="{{ st.block_threshold }}"></div>
+  <div class="col-6"><label class="form-label">Alert from level</label><select name="alert_level" class="form-select">{% for l in levels %}<option {{ 'selected' if st.alert_level == l }}>{{ l }}</option>{% endfor %}</select></div>
+  <div class="col-6"><label class="form-label">History retention (days)</label><input type="number" name="retention_days" min="1" max="365" class="form-control" value="{{ st.retention_days }}"></div>
+ </div>
+ {% for f, label in [('auto_block_sender','Automatically block senders of blocked e-mails'),('use_ml','Use machine-learning classifier'),('check_urls','Analyze links'),('use_external_reputation','Use DNS / DNSBL / Safe Browsing / VirusTotal / URLScan reputation'),('check_attachments','Inspect attachments'),('alert_email','Also send alerts by e-mail (needs SMTP)'),('sms_scan_enabled','Enable SMS / messaging scam detection'),('notify_sms_threats','Create alerts for flagged SMS / messaging messages')] %}
+ <div class="form-check form-switch mb-2"><input class="form-check-input" type="checkbox" name="{{ f }}" id="{{ f }}" {{ 'checked' if st[f] }}><label class="form-check-label" for="{{ f }}">{{ label }}</label></div>
+ {% endfor %}
+ <button class="btn btn-accent mt-3">Save policy</button></form></div></div></div>
+<div class="col-lg-6"><div class="card mb-3"><div class="card-header">Custom rules</div>
+<div class="table-responsive"><table class="table align-middle mb-0"><tbody>
+{% for r in custom %}<tr class="{{ '' if r.enabled else 'opacity-50' }}"><td><b>{{ r.name }}</b><div class="small text-muted">{{ r.field }} {{ r.match_type }} <span class="mono">{{ r.pattern }}</span></div></td>
+<td><span class="badge {{ 'bg-danger' if r.score > 0 else 'bg-success' }}">{{ '%+d'|format(r.score) }}</span></td>
+<td class="text-end text-nowrap"><form class="d-inline" method="post" action="{{ url_for('main.rule_action', rule_id=r.id, action='toggle') }}">{{ csrf() }}<button class="btn btn-sm btn-outline-secondary">{{ 'Disable' if r.enabled else 'Enable' }}</button></form>
+<form class="d-inline" method="post" action="{{ url_for('main.rule_action', rule_id=r.id, action='delete') }}">{{ csrf() }}<button class="btn btn-sm btn-outline-danger">×</button></form></td></tr>
+{% else %}<tr><td class="text-muted text-center py-3">No custom rules yet.</td></tr>{% endfor %}</tbody></table></div></div>
+<div class="card"><div class="card-header">Add rule</div><div class="card-body"><form method="post" action="{{ url_for('main.add_rule') }}" class="row g-2">{{ csrf() }}
+ <div class="col-12"><input name="name" class="form-control" placeholder="Rule name"></div>
+ <div class="col-4"><select name="field" class="form-select"><option>body</option><option>subject</option><option>sender</option><option>any</option></select></div>
+ <div class="col-4"><select name="match_type" class="form-select"><option>contains</option><option>regex</option></select></div>
+ <div class="col-4"><input type="number" name="score" class="form-control" value="25" min="-100" max="100" title="Risk points (negative = trusted)"></div>
+ <div class="col-12"><input name="pattern" class="form-control" placeholder="Keyword or regular expression" required></div>
+ <div class="col-12"><button class="btn btn-accent">Add rule</button></div></form></div></div></div>
+</div>{% endblock %}

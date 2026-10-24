@@ -1,0 +1,62 @@
+{% extends 'base.html' %}{% block title %}Mailboxes{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Connected mailboxes (IMAP / SMTP)</h4>
+<div class="card mb-4"><div class="table-responsive"><table class="table align-middle mb-0">
+<thead><tr><th>Name</th><th>Server</th><th>Folders</th><th>Last check</th><th></th></tr></thead><tbody>
+{% for a in accounts %}<tr class="{{ '' if a.enabled else 'opacity-50' }}"><td><b>{{ a.name }}</b><div class="small text-muted">{{ a.username }}</div></td>
+<td class="small">{{ a.imap_host }}:{{ a.imap_port }}<br>every {{ a.poll_minutes }} min</td><td class="small">{{ a.folder }} → {{ a.quarantine_folder }}</td>
+<td class="small">{{ a.last_checked.strftime('%m-%d %H:%M') if a.last_checked else 'never' }}<br><span class="text-muted">{{ a.last_status or '' }}</span></td>
+<td class="text-end text-nowrap">{% for act, label in [('test','Test'),('scan','Scan now'),('toggle','Disable' if a.enabled else 'Enable'),('delete','Remove')] %}
+<form class="d-inline" method="post" action="{{ url_for('main.account_action', acc_id=a.id, action=act) }}">{{ csrf() }}<button class="btn btn-sm btn-outline-{{ 'danger' if act == 'delete' else 'secondary' }}">{{ label }}</button></form>{% endfor %}</td></tr>
+{% else %}<tr><td colspan="5" class="text-center text-muted py-4">No mailbox connected. You can still scan e-mails manually or via the API.</td></tr>{% endfor %}</tbody></table></div></div>
+
+{# Gmail OAuth accounts #}
+<h5 class="mb-2">Gmail API (OAuth2)</h5>
+{% if oauth_tokens %}
+<div class="card mb-4"><div class="table-responsive"><table class="table align-middle mb-0">
+<thead><tr><th>Account</th><th>Status</th><th>Last checked</th><th></th></tr></thead><tbody>
+{% for tok in oauth_tokens %}
+<tr>
+ <td><b>{{ tok.email }}</b><div class="small text-muted">{{ tok.provider }}</div></td>
+ <td class="small {{ 'text-success' if 'OK' in (tok.last_status or '') else 'text-warning' }}">{{ tok.last_status or 'not checked' }}</td>
+ <td class="small">{{ tok.last_checked.strftime('%m-%d %H:%M') if tok.last_checked else 'never' }}</td>
+ <td class="text-end text-nowrap">
+  <form class="d-inline" method="post" action="{{ url_for('oauth.gmail_scan', token_id=tok.id) }}">{{ csrf() }}
+   <button class="btn btn-sm btn-outline-secondary">Scan now</button></form>
+  <form class="d-inline" method="post" action="{{ url_for('oauth.gmail_delete', token_id=tok.id) }}">{{ csrf() }}
+   <button class="btn btn-sm btn-outline-danger">Disconnect</button></form>
+ </td>
+</tr>
+{% endfor %}
+</tbody></table></div></div>
+{% else %}
+<div class="card mb-4"><div class="card-body text-muted small">
+ No Gmail OAuth accounts connected.
+ {% if gmail_configured %}
+ <a href="{{ url_for('oauth.gmail_connect') }}" class="btn btn-sm btn-outline-secondary ms-2">Connect Gmail via OAuth2</a>
+ {% else %}
+ <br>Set <code>GMAIL_CLIENT_ID</code> and <code>GMAIL_CLIENT_SECRET</code> in <code>.env</code> to enable Gmail API access.
+ {% endif %}
+</div></div>
+{% endif %}
+{% if gmail_configured and not oauth_tokens %}
+<div class="mb-4">
+ <a href="{{ url_for('oauth.gmail_connect') }}" class="btn btn-accent btn-sm">Connect Gmail via OAuth2 →</a>
+ <div class="form-text mt-1">Grants read-only access to your Gmail inbox without storing your password.</div>
+</div>
+{% endif %}
+
+<div class="card"><div class="card-header">Add IMAP mailbox</div><div class="card-body"><form method="post" class="row g-3">{{ csrf() }}
+ <div class="col-md-4"><label class="form-label">Display name</label><input name="name" class="form-control" required placeholder="Work Gmail"></div>
+ <div class="col-md-4"><label class="form-label">Username</label><input name="username" class="form-control" required></div>
+ <div class="col-md-4"><label class="form-label">Password / app password</label><input type="password" name="password" class="form-control" required><div class="form-text">Stored encrypted. Use an app password where available.</div></div>
+ <div class="col-md-4"><label class="form-label">IMAP host</label><input name="imap_host" class="form-control" required placeholder="imap.gmail.com"></div>
+ <div class="col-md-2"><label class="form-label">IMAP port</label><input type="number" name="imap_port" class="form-control" value="993"></div>
+ <div class="col-md-4"><label class="form-label">SMTP host (alerts)</label><input name="smtp_host" class="form-control" placeholder="smtp.gmail.com"></div>
+ <div class="col-md-2"><label class="form-label">SMTP port</label><input type="number" name="smtp_port" class="form-control" value="587"></div>
+ <div class="col-md-3"><label class="form-label">Monitor folder</label><input name="folder" class="form-control" value="INBOX"></div>
+ <div class="col-md-3"><label class="form-label">Quarantine folder</label><input name="quarantine_folder" class="form-control" value="CyberShield-Quarantine"></div>
+ <div class="col-md-2"><label class="form-label">Poll (minutes)</label><input type="number" name="poll_minutes" class="form-control" value="5" min="1"></div>
+ <div class="col-md-4 d-flex align-items-end gap-4"><div class="form-check"><input class="form-check-input" type="checkbox" name="imap_ssl" id="ssl" checked><label class="form-check-label" for="ssl">SSL</label></div>
+  <div class="form-check"><input class="form-check-input" type="checkbox" name="auto_move" id="am" checked><label class="form-check-label" for="am">Auto-move threats</label></div></div>
+ <div class="col-12"><button class="btn btn-accent">Add mailbox</button></div></form></div></div>{% endblock %}

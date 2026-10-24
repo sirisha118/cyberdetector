@@ -1,0 +1,42 @@
+{% extends 'base.html' %}{% block title %}Scan Message{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Scan a message</h4>
+<p class="text-muted">Paste an SMS, WhatsApp, or other messaging notification to scan it for scams, phishing links, and fraud patterns.</p>
+<div class="card"><div class="card-body"><form method="post">{{ csrf() }}
+ <div class="row g-3">
+  <div class="col-md-6">
+   <label class="form-label">Source</label>
+   <select name="source" class="form-select">
+    <option value="sms">SMS</option>
+    <option value="whatsapp">WhatsApp</option>
+    <option value="telegram">Telegram</option>
+    <option value="messenger">Messenger</option>
+    <option value="manual">Other / Unknown</option>
+   </select>
+  </div>
+  <div class="col-md-6">
+   <label class="form-label">Sender (optional)</label>
+   <input type="text" name="sender" class="form-control" placeholder="+91XXXXXXXXXX or HDFCBK">
+   <div class="form-text">Phone number, short code, or display name</div>
+  </div>
+  <div class="col-12">
+   <label class="form-label">Message text <span class="text-danger">*</span></label>
+   <textarea name="text" rows="8" class="form-control mono" required
+    placeholder="Your HDFC Bank account will be blocked. Complete KYC: http://bit.ly/kyc-verify"></textarea>
+  </div>
+  <div class="col-12"><button class="btn btn-accent">Analyze message</button></div>
+ </div>
+</form></div></div>
+
+<div class="card mt-4"><div class="card-header">Android companion (automatic SMS detection)</div>
+<div class="card-body">
+ <p class="text-muted small mb-2">To scan SMS messages automatically from your Android device, use the CyberShield REST API from a companion app:</p>
+ <ol class="text-muted small">
+  <li>Grant your companion app <code>READ_SMS</code> permission on Android.</li>
+  <li>On each new SMS, POST to <code>POST /api/v1/sms/scan</code> with your API key.</li>
+  <li>The server returns the risk score and verdict immediately.</li>
+  <li>Your app can show a local notification if <code>action != "allowed"</code>.</li>
+ </ol>
+ <p class="text-muted small">See the API docs in the README for the JSON schema. Your API key is on the <a href="{{ url_for('auth.profile') }}">Profile page</a>.</p>
+</div></div>
+{% endblock %}

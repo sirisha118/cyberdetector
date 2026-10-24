@@ -1,0 +1,12 @@
+{% extends 'base.html' %}{% block title %}Quarantine{% endblock %}{% block content %}
+{% from '_macros.html' import level, action, score, csrf %}
+<h4 class="mb-3">Quarantine <span class="badge bg-secondary">{{ items|length }}</span></h4>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+<thead><tr><th>Date</th><th>Sender</th><th>Subject</th><th>Verdict</th><th>Risk</th><th>Action</th><th class="text-end">Manage</th></tr></thead><tbody>
+{% for s in items %}<tr><td class="small text-muted">{{ s.scanned_at.strftime('%m-%d %H:%M') }}</td><td class="text-truncate" style="max-width:190px">{{ s.sender }}</td>
+<td class="text-truncate" style="max-width:240px"><a href="{{ url_for('main.email_detail', scan_id=s.id) }}">{{ s.subject or '(no subject)' }}</a></td>
+<td>{{ s.verdict }}</td><td style="min-width:110px">{{ score(s.risk_score) }}</td><td>{{ action(s.action) }}</td>
+<td class="text-end text-nowrap"><form class="d-inline" method="post" action="{{ url_for('main.release', scan_id=s.id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline-success">Release</button></form>
+<form class="d-inline" method="post" action="{{ url_for('main.delete_email', scan_id=s.id) }}">{{ csrf() }}<button class="btn btn-sm btn-outline-danger">Delete</button></form></td></tr>
+{% else %}<tr><td colspan="7" class="text-center text-muted py-5">Quarantine is empty 🎉</td></tr>{% endfor %}
+</tbody></table></div></div>{% endblock %}

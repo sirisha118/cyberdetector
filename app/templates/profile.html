@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Profile{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Profile &amp; API access</h4>
+<div class="row g-3"><div class="col-lg-6"><div class="card"><div class="card-header">API key</div><div class="card-body">
+<p class="text-muted small">Send as header <code>X-API-Key</code> to <code>/api/v1/*</code> (see README).</p>
+<div class="mono p-2 mb-3" style="background:#0d1626;border-radius:6px">{{ current_user.api_key }}</div>
+<form method="post">{{ csrf() }}<input type="hidden" name="action" value="api_key"><button class="btn btn-outline-warning btn-sm">Regenerate key</button></form></div></div></div>
+<div class="col-lg-6"><div class="card"><div class="card-header">Change password</div><div class="card-body"><form method="post">{{ csrf() }}<input type="hidden" name="action" value="password">
+<div class="mb-2"><input type="password" name="current" class="form-control" placeholder="Current password" required></div>
+<div class="mb-3"><input type="password" name="new" class="form-control" placeholder="New password (min 8)" required></div>
+<button class="btn btn-accent btn-sm">Update</button></form></div></div></div></div>{% endblock %}

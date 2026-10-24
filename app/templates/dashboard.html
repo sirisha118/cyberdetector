@@ -1,0 +1,76 @@
+{% extends 'base.html' %}{% block title %}Dashboard{% endblock %}{% block content %}
+{% from '_macros.html' import level, action, score %}
+<h4 class="mb-3">Threat overview <small class="text-muted fs-6">last 14 days</small></h4>
+
+{# ── Email stats row ── #}
+<h6 class="text-muted mb-2">Email scanning</h6>
+<div class="row g-3 mb-4">
+ {% for label, val, color in [('E-mails scanned', stats.total, '#e5ecf6'), ('Allowed', stats.allowed, '#4ade80'), ('Quarantined', stats.quarantined, '#fbbf24'), ('Blocked', stats.blocked, '#f87171'), ('Avg risk score', stats.avg_score, '#7dd3fc')] %}
+ <div class="col-6 col-md"><div class="card"><div class="card-body"><div class="stat" style="color:{{ color }}">{{ val }}</div><div class="stat-label">{{ label }}</div></div></div></div>
+ {% endfor %}
+</div>
+
+{# ── SMS / messaging stats row ── #}
+<h6 class="text-muted mb-2">SMS &amp; messaging</h6>
+<div class="row g-3 mb-4">
+ {% for label, val, color in [('Messages scanned', stats.sms_total, '#e5ecf6'), ('Flagged', stats.sms_flagged, '#f87171'), ('Avg risk score', stats.sms_avg_score, '#7dd3fc')] %}
+ <div class="col-6 col-md"><div class="card"><div class="card-body"><div class="stat" style="color:{{ color }}">{{ val }}</div><div class="stat-label">{{ label }}</div></div></div></div>
+ {% endfor %}
+ <div class="col-6 col-md"><div class="card"><div class="card-body text-center">
+  <a href="{{ url_for('main.sms_scan') }}" class="btn btn-accent btn-sm">Scan message</a>
+  <div class="stat-label mt-1">Manual scan</div>
+ </div></div></div>
+ <div class="col-6 col-md"><div class="card"><div class="card-body">
+  <div class="stat" style="color:#fbbf24">{{ stats.held }}</div><div class="stat-label">In quarantine</div>
+ </div></div></div>
+</div>
+
+{# ── Charts row ── #}
+<div class="row g-3 mb-4">
+ <div class="col-lg-6"><div class="card h-100"><div class="card-header">Daily email activity</div><div class="card-body"><canvas id="threatChart" height="110"></canvas></div></div></div>
+ <div class="col-lg-3"><div class="card h-100"><div class="card-header">Email threat types</div><div class="card-body"><canvas id="verdictChart"></canvas></div></div></div>
+ <div class="col-lg-3"><div class="card h-100"><div class="card-header">Threat levels</div><div class="card-body"><canvas id="levelChart"></canvas></div></div></div>
+</div>
+
+{# ── Source breakdown + SMS verdicts ── #}
+<div class="row g-3 mb-4">
+ <div class="col-lg-4"><div class="card h-100"><div class="card-header">Scan sources</div><div class="card-body"><canvas id="sourceChart"></canvas></div></div></div>
+ <div class="col-lg-4"><div class="card h-100"><div class="card-header">SMS / messaging threats</div><div class="card-body">
+  {% if stats.sms_by_verdict %}
+   {% for verdict, cnt in stats.sms_by_verdict.items() %}
+   <div class="d-flex justify-content-between py-1 border-bottom" style="border-color:var(--cs-line)!important">
+    <span class="text-capitalize">{{ verdict }}</span><span class="badge bg-danger">{{ cnt }}</span>
+   </div>
+   {% endfor %}
+  {% else %}
+   <p class="text-muted small mt-2">No SMS threats in the last 14 days.<br><a href="{{ url_for('main.sms_scan') }}">Scan a message now →</a></p>
+  {% endif %}
+ </div></div></div>
+ <div class="col-lg-4"><div class="card h-100"><div class="card-header">Quick stats</div><div class="card-body d-flex flex-column gap-2">
+  <div class="d-flex justify-content-between"><span class="text-muted small">Held in quarantine</span><span class="badge bg-warning text-dark">{{ stats.held }}</span></div>
+  <div class="d-flex justify-content-between"><span class="text-muted small">Unread email alerts</span><span class="badge bg-secondary">{{ stats.unread_alerts }}</span></div>
+  <div class="d-flex justify-content-between"><span class="text-muted small">Unread SMS alerts</span><span class="badge bg-secondary">{{ stats.unread_sms_alerts }}</span></div>
+ </div></div></div>
+</div>
+
+{# ── Recent detections table ── #}
+<div class="row g-3">
+ <div class="col-lg-8"><div class="card"><div class="card-header d-flex justify-content-between">Recent email detections <a class="small" href="{{ url_for('main.emails', action='quarantined') }}">View all</a></div>
+  <div class="table-responsive"><table class="table table-hover align-middle mb-0">
+  <thead><tr><th>Sender</th><th>Subject</th><th>Risk</th><th>Level</th><th>Action</th></tr></thead><tbody>
+  {% for s in recent %}<tr onclick="location='{{ url_for('main.email_detail', scan_id=s.id) }}'" style="cursor:pointer">
+   <td class="text-truncate" style="max-width:180px">{{ s.sender }}</td><td class="text-truncate" style="max-width:240px">{{ s.subject }}</td>
+   <td style="min-width:110px">{{ score(s.risk_score) }}</td><td>{{ level(s.threat_level) }}</td><td>{{ action(s.action) }}</td></tr>
+  {% else %}<tr><td colspan="5" class="text-center text-muted py-4">No threats detected yet. Try <a href="{{ url_for('main.manual_scan') }}">scanning an e-mail</a>.</td></tr>{% endfor %}
+  </tbody></table></div></div></div>
+ <div class="col-lg-4">
+  <div class="card mb-3"><div class="card-header">Top threat sender domains</div><ul class="list-group list-group-flush">
+  {% for d in stats.top_domains %}<li class="list-group-item bg-transparent text-light d-flex justify-content-between"><span>{{ d.domain }}</span><span class="badge bg-danger">{{ d.count }}</span></li>
+  {% else %}<li class="list-group-item bg-transparent text-muted">Nothing yet</li>{% endfor %}</ul></div>
+ </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+{% endblock %}

@@ -1,0 +1,32 @@
+From: "PayPal Security" <security@paypa1-support.com>
+To: victim@example.com
+Reply-To: helpdesk@mail-recovery.top
+Subject: URGENT: Your account has been limited - verify your identity
+Message-ID: <phish1@cybershield.sample>
+Authentication-Results: mx.example.com; spf=fail; dkim=none; dmarc=fail
+MIME-Version: 1.0
+Content-Type: multipart/alternative;
+ boundary="===============0866180651387744535=="
+
+--===============0866180651387744535==
+Content-Type: text/plain; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+
+Dear customer,
+
+We noticed unusual activity on your PayPal account. Your account will be susp=
+ended within 24 hours. Verify your account and confirm your password immediat=
+ely:
+http://paypal.com.secure-login.verify-account.xyz/signin
+
+PayPal Security Team
+
+--===============0866180651387744535==
+Content-Type: text/html; charset="utf-8"
+Content-Transfer-Encoding: quoted-printable
+MIME-Version: 1.0
+
+<p>Dear customer, unusual activity detected. <a href=3D"http://198.51.100.23/=
+paypal/login">https://www.paypal.com/myaccount</a></p>
+
+--===============0866180651387744535==--

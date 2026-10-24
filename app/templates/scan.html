@@ -1,0 +1,8 @@
+{% extends 'base.html' %}{% block title %}Scan e-mail{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<h4 class="mb-3">Scan an e-mail</h4>
+<div class="card"><div class="card-body"><form method="post" enctype="multipart/form-data">{{ csrf() }}
+ <div class="mb-3"><label class="form-label">Upload .eml file</label><input type="file" name="eml" accept=".eml,message/rfc822" class="form-control"></div>
+ <div class="text-center text-muted my-2">— or paste raw e-mail source (headers + body) —</div>
+ <textarea name="raw" rows="12" class="form-control mono" placeholder="From: &quot;PayPal&quot; &lt;security@paypa1-support.com&gt;&#10;Subject: Urgent: verify your account&#10;&#10;Dear customer..."></textarea>
+ <button class="btn btn-accent mt-3">Analyze</button></form></div></div>{% endblock %}

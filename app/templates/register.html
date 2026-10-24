@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Register{% endblock %}{% block content %}
+{% from '_macros.html' import csrf %}
+<div class="card auth-card"><div class="card-body p-4"><h3 class="mb-3">Create account</h3>
+<form method="post">{{ csrf() }}
+<div class="mb-3"><label class="form-label">Username</label><input name="username" class="form-control" required></div>
+<div class="mb-3"><label class="form-label">E-mail</label><input type="email" name="email" class="form-control" required></div>
+<div class="mb-3"><label class="form-label">Password (min 8)</label><input type="password" name="password" class="form-control" required minlength="8"></div>
+<div class="mb-3"><label class="form-label">Confirm password</label><input type="password" name="confirm" class="form-control" required></div>
+<button class="btn btn-accent w-100">Register</button></form>
+<p class="small text-muted mt-3 mb-0">Already registered? <a href="{{ url_for('auth.login') }}">Sign in</a>. The first user becomes administrator.</p>
+</div></div>{% endblock %}

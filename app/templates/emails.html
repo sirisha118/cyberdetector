@@ -1,0 +1,19 @@
+{% extends 'base.html' %}{% block title %}Scan history{% endblock %}{% block content %}
+{% from '_macros.html' import level, action, score, pager %}
+<h4 class="mb-3">E-mail scan history</h4>
+<form class="row g-2 mb-3" method="get">
+ <div class="col-md-4"><input name="q" value="{{ request.args.q }}" class="form-control" placeholder="Search sender or subject"></div>
+ <div class="col-md-2"><select name="action" class="form-select"><option value="">Any action</option>{% for a in ['allowed','quarantined','blocked'] %}<option {{ 'selected' if request.args.action == a }}>{{ a }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><select name="level" class="form-select"><option value="">Any level</option>{% for l in levels %}<option {{ 'selected' if request.args.level == l }}>{{ l }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><select name="verdict" class="form-select"><option value="">Any verdict</option>{% for v in ['clean','spam','phishing','malware','suspicious'] %}<option {{ 'selected' if request.args.verdict == v }}>{{ v }}</option>{% endfor %}</select></div>
+ <div class="col-md-2"><button class="btn btn-accent w-100">Filter</button></div>
+</form>
+<div class="card"><div class="table-responsive"><table class="table table-hover align-middle mb-0">
+<thead><tr><th>Scanned</th><th>Sender</th><th>Subject</th><th>Verdict</th><th>Risk</th><th>Level</th><th>Action</th></tr></thead><tbody>
+{% for s in page.items %}<tr onclick="location='{{ url_for('main.email_detail', scan_id=s.id) }}'" style="cursor:pointer">
+ <td class="small text-muted">{{ s.scanned_at.strftime('%Y-%m-%d %H:%M') }}</td><td class="text-truncate" style="max-width:200px">{{ s.sender }}</td>
+ <td class="text-truncate" style="max-width:260px">{{ s.subject }}</td><td>{{ s.verdict }}</td><td style="min-width:110px">{{ score(s.risk_score) }}</td><td>{{ level(s.threat_level) }}</td><td>{{ action(s.action) }}</td></tr>
+{% else %}<tr><td colspan="7" class="text-center text-muted py-4">No scans match.</td></tr>{% endfor %}
+</tbody></table></div></div>
+{{ pager(page, 'main.emails', q=request.args.q, action=request.args.action, level=request.args.level, verdict=request.args.verdict) }}
+{% endblock %}

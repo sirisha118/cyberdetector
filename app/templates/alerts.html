@@ -1,0 +1,11 @@
+{% extends 'base.html' %}{% block title %}Alerts{% endblock %}{% block content %}
+{% from '_macros.html' import level, csrf, pager %}
+<div class="d-flex justify-content-between mb-3"><h4>Security alerts</h4>
+<form method="post" action="{{ url_for('main.alerts_read') }}">{{ csrf() }}<button class="btn btn-sm btn-outline-secondary">Mark all read</button></form></div>
+<div class="card"><ul class="list-group list-group-flush">
+{% for a in page.items %}<li class="list-group-item bg-transparent text-light d-flex justify-content-between align-items-start">
+<div>{{ level(a.level) }} {% if not a.is_read %}<span class="badge bg-danger">new</span>{% endif %}
+<a class="ms-2" href="{% if a.scan_id %}{{ url_for('main.email_detail', scan_id=a.scan_id) }}{% else %}#{% endif %}">{{ a.message }}</a></div>
+<small class="text-muted text-nowrap ms-3">{{ a.created_at.strftime('%m-%d %H:%M') }}</small></li>
+{% else %}<li class="list-group-item bg-transparent text-muted text-center py-4">No alerts.</li>{% endfor %}</ul></div>
+{{ pager(page, 'main.alerts') }}{% endblock %}

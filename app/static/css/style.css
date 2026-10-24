@@ -1,0 +1,54 @@
+:root{--cs-bg:#0b1220;--cs-card:#121b2e;--cs-line:#1f2b45;--cs-accent:#22d3a6;--cs-text:#e5ecf6;--cs-muted:#8a9bb8}
+body{background:var(--cs-bg);color:var(--cs-text);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.navbar{background:#0a101d!important;border-bottom:1px solid var(--cs-line)}
+.navbar-brand{font-weight:700;letter-spacing:.3px}.navbar-brand span{color:var(--cs-accent)}
+.nav-link{color:var(--cs-muted)!important}.nav-link.active,.nav-link:hover{color:#fff!important}
+.card{background:var(--cs-card);border:1px solid var(--cs-line);color:var(--cs-text)}
+.card-header{background:transparent;border-bottom:1px solid var(--cs-line);font-weight:600}
+.table{--bs-table-bg:transparent;--bs-table-color:var(--cs-text);--bs-table-border-color:var(--cs-line);--bs-table-hover-bg:#17233b;--bs-table-hover-color:#fff}
+.text-muted,.form-text{color:var(--cs-muted)!important}
+.form-control,.form-select{background:#0d1626;border-color:var(--cs-line);color:var(--cs-text)}
+.form-control:focus,.form-select:focus{background:#0d1626;color:#fff;border-color:var(--cs-accent);box-shadow:0 0 0 .2rem rgba(34,211,166,.15)}
+.form-control::placeholder{color:#5c6c88}
+.btn-accent{background:var(--cs-accent);border-color:var(--cs-accent);color:#05231b;font-weight:600}
+.btn-accent:hover{background:#4be3bf;color:#05231b}
+a{color:var(--cs-accent)}a:hover{color:#4be3bf}
+.stat{font-size:2rem;font-weight:700;line-height:1}.stat-label{color:var(--cs-muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.06em}
+.lvl{padding:.2rem .55rem;border-radius:999px;font-size:.72rem;font-weight:700;text-transform:uppercase}
+.lvl-safe{background:#0f3a2e;color:#4ade80}.lvl-low{background:#1d3a4a;color:#7dd3fc}
+.lvl-medium{background:#4a3a0f;color:#fbbf24}.lvl-high{background:#4a230f;color:#fb923c}.lvl-critical{background:#4a0f1a;color:#f87171}
+.act{font-size:.72rem;font-weight:700;text-transform:uppercase}.act-allowed{color:#4ade80}.act-quarantined{color:#fbbf24}.act-blocked{color:#f87171}
+.score-bar{height:8px;border-radius:4px;background:#1f2b45;overflow:hidden}.score-bar>div{height:100%}
+.mono{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;word-break:break-all}
+.body-excerpt{white-space:pre-wrap;background:#0d1626;border:1px solid var(--cs-line);border-radius:8px;padding:1rem;max-height:340px;overflow:auto}
+.auth-card{max-width:420px;margin:8vh auto}
+.alert{border:0}
+
+/* ── Mobile responsive tweaks — desktop appearance unchanged ────────────────── */
+
+/* Scrollable navbar when collapsed on tablet/phone (9+ nav items) */
+@media (max-width: 991.98px){
+    .navbar-collapse{max-height:75vh;overflow-y:auto;
+        -webkit-overflow-scrolling:touch;border-top:1px solid var(--cs-line)}
+    .navbar-collapse .navbar-nav{padding-bottom:.5rem}
+}
+
+/* Phone-size adjustments */
+@media (max-width: 575.98px){
+    .stat{font-size:1.5rem}
+    .stat-label{font-size:.72rem}
+    .mono{font-size:.8rem}
+    .body-excerpt{max-height:240px;padding:.75rem}
+    .card-body{padding:.75rem}
+    .auth-card{margin:4vh auto}
+}
+
+/* Very small phones */
+@media (max-width: 374.98px){
+    .stat{font-size:1.3rem}
+    .h4,h4{font-size:1.1rem}
+}
+
+/* Ensure horizontal-scroll containers don't cause page-level overflow */
+.table-responsive{-webkit-overflow-scrolling:touch}
+
